@@ -1,6 +1,6 @@
 # clone-linux
 
-This is a tool to clone your mounted boot system "/" and your mounted home "/home" partition, if there is one, into 
+This is a tool to clone your linux boot "/" system and your separate home "/home" partition, if there is one, into 
 another partition or device in a seamlessly and safely way.
 
 ## Credits 
@@ -18,6 +18,10 @@ other coding tweaks to turn the cloning process safer.
 
 Imortant notes to consider:
 
+* The script must be ran in a terminal with bash shell and have the whiptail package installed.
+
+* You must be cloning from your mounted (live) boot system and mounted home partition.
+
 * You must create empty ext4 partitions large enough to hold your linux distro partitions.
 
 * Your target (clone) partitions must not be mounted before calling the `clone-linux` script.
@@ -25,3 +29,13 @@ Imortant notes to consider:
 * When you are recloning, any new data on the previous clone partition will be deleted.
 
 * Before cloning, a confirmation screen is displayed with information about source and target partitions.
+
+## Usage
+
+Download it with the following command:
+
+    curl -L -O github.com/thiggy01/clone-linux/raw/master/clone-linux
+
+Change its execution permission with `chmod +x clone-linux` and run it with root privileges as `sudo ./clone-linux`
+
+After running the script, you will be 
