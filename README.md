@@ -16,4 +16,12 @@ other coding tweaks to turn the cloning process safer.
 
 ## Preparation
 
+Imortant notes to consider:
 
+    * You must create empty ext4 partitions large enough to hold your linux distro partitions.
+
+    * Your target (clone) partitions must not be mounted before calling the `clone-linux` script.
+
+    * When you are recloning, any new data on the previous clone partition will be deleted.
+
+    * Before cloning, a confirmation screen is displayed with information about source and target partitions.

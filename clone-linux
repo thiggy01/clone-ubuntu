@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# This script automates the process of cloning Ubuntu into another partition or
-# device in a seamlessly and safely way.
+# This script automates the process of cloning linux systems into another partition
+# or device in a seamlessly and safely way.
 # By Thiago Silva
 
-# This script is a fork from the one posted by WinEunuuchs2Unix at askubuntu 
+# This script is a fork of the one posted by WinEunuuchs2Unix at askubuntu 
 # (https://bit.ly/34RNGbv) as a tool to avoid losing the whole system when 
 # upgrading from 16.04, 17.04 or 17.10 LTS to 18.04 LTS.
 
@@ -13,9 +13,9 @@
 # to detect and clone, not just the root partition, but the /home partition too,
 # among other coding tweaks to turn the cloning process more safe and intuitive.
 
-#
+# =================================================================================
+
 # Make sure the script has the aproppriate enviroment and root privileges. 
-#
 
 # $TERM variable may be missing when called via desktop shortcut
 CurrentTERM=$(env | grep TERM)
@@ -30,9 +30,7 @@ if [ "$(id -u)" -ne 0 ] ; then
     exit 1
 fi
 
-#
 # Create unqique temporary file names
-#
 
 TmpUUIDList=$(mktemp /tmp/clone-ubuntu.XXXXX)  
 TmpWhiptailMenu=$(mktemp /tmp/clone-ubuntu.XXXXX)
@@ -40,9 +38,7 @@ TmpSrcInf=$(mktemp /tmp/clone-ubuntu.XXXXX)
 TmpTrgtInf=$(mktemp /tmp/clone-ubuntu.XXXXX)
 TmpDistInf=$(mktemp /tmp/clone-ubuntu.XXXXXi)
 
-#
 # Create repeatable code functions.
-#
 
 # Removes temporary files and umount clone partitions
 CleanUp () {
@@ -110,9 +106,7 @@ Validate () {
     fi
 }    
 
-#
 # Build whiptail menu tags and text into an array.
-#
 
 lsblk -o NAME,FSTYPE,LABEL,SIZE,MOUNTPOINT > "$TmpWhiptailMenu"
 i=0
@@ -151,10 +145,8 @@ while read -r Line; do
     (( i++ ))
 done < "$TmpWhiptailMenu"                           # Read next "lsblk" line.
 
-#
 # Display whiptail menu in while loop until no errors, or escape,
 # or valid partion selection.
-#
 
 while true; do
     # Call whiptail box to paint menu, get user selection and validate it.
@@ -210,9 +202,7 @@ while true; do
     break                                   # Validated: Break menu loop.
 done                                        # Loop while errors.
 
-#
 # Get confirmation about boot and clone partitions.
-#
 
 TargetBootMnt='/mnt/bootclone'
 echo ""
@@ -267,9 +257,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
     exit 0
 fi
 
-#
 # Copy boot partition to target partition and update fstab and grub menu.
-#
 
 # If there's a /home partition, don't copy it.
 if [ -n "$TargetHomeDev" ]; then
@@ -316,9 +304,7 @@ echo "==========================================================================
 echo "Calling 'update-grub' to create new boot menu"
 update-grub
 
-#
 # Get confirmation about home and clone partitions.
-#
 
 if [ -n "$TargetHomeDev" ]; then	
     # Mount home partition.
@@ -381,9 +367,7 @@ if [ -n "$TargetHomeDev" ]; then
 	exit 0
     fi
 
-    #
     # Copy home partition to target partition. 
-    #
 
     SECONDS=0
     echo 
@@ -412,9 +396,7 @@ echo "==========================================================================
 echo "Unmounting $TargetBootDev as $TargetBootMnt"
 echo
 
-#
 # Unmount clone partitions, remove temporaty files and exit script.
-#
 
 CleanUp             
 exit 0
