@@ -35,13 +35,12 @@ Imortant notes to consider:
 Download it with the following command: `curl -L -O github.com/thiggy01/clone-linux/raw/master/clone-linux`, give it
 execution permission with `chmod +x clone-linux` and run it with root privileges as `sudo ./clone-linux`
 
-After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition, as
-seen below.
+After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition.
 
 <p align="center"><img src="https://i.imgur.com/X7MVELD.png"></p>
 
 If you have a separate /home partition, it will be detected by the script and you will be promped to select the target
-/home partition, as seen below.
+/home partition.
 
 <p align="center"><img src="https://i.imgur.com/p8gpJCw.png"></p>
 
@@ -50,3 +49,9 @@ screen with the source and target information, including size, used and availabl
 
 <p align="center"><img src="https://i.imgur.com/JfYyIal.png"></p>
 
+If you type Y or y to proceed, the script start the cloning process and will show progress and some stats at the end.
+When the copying is finished, the scrip will change the target fstab file in order to mount the corrent clone UUID.
+It also changes the UUID from the target grub.cfg file to the clone one and update it to add the menu entry for the 
+clone linux system, as shown below:
+
+<p  aligh="center"><img src="https://i.imgur.com/i3QcTXb.gifv"></p>
