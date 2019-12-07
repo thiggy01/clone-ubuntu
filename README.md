@@ -54,4 +54,4 @@ When the copying is finished, the scrip will change the target fstab file in ord
 It also changes the UUID from the target grub.cfg file to the clone one and update it to add the menu entry for the 
 clone linux system, as shown below:
 
-<p  aligh="center"><img src="https://i.imgur.com/i3QcTXb.gifv"></p>
+<p  aligh="center"><img src="https://i.imgur.com/i3QcTXb.gif"></p>
