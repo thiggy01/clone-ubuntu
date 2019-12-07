@@ -32,10 +32,10 @@ Imortant notes to consider:
 
 ## Usage
 
-Download it with the following command:
+Download it with the following command: `curl -L -O github.com/thiggy01/clone-linux/raw/master/clone-linux`, give it
+execution permission with `chmod +x clone-linux` and run it with root privileges as `sudo ./clone-linux`
 
-    curl -L -O github.com/thiggy01/clone-linux/raw/master/clone-linux
+After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition, as
+seen below.
 
-Change its execution permission with `chmod +x clone-linux` and run it with root privileges as `sudo ./clone-linux`
-
-After running the script, you will be 
+[clone-linux menu](https://i.imgur.com/OY71spK.png)
