@@ -38,4 +38,4 @@ execution permission with `chmod +x clone-linux` and run it with root privileges
 After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition, as
 seen below.
 
-[clone-linux menu](https://i.imgur.com/OY71spK.png)
+![clone-linux menu](https://i.imgur.com/OY71spK.png)
