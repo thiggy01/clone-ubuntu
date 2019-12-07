@@ -39,8 +39,7 @@ After starting the script, you will see a menu asking you to selecte your umount
 
 <p align="center"><img width="460" height="312" src="https://i.imgur.com/NGZMBOO.png"></p>
 
-If you have a separate /home partition, it will be detected by the script and you will be promped to select the target
-/home partition.
+If you have a separate /home partition, it will be detected by the script and you will be promped to select the target /home partition.
 
 <p align="center"><img width="460" height="312" src="https://i.imgur.com/be18MSl.png"></p>
 
@@ -53,7 +52,7 @@ When the copying is finished, the script will change the target fstab file in or
 It also changes the UUID from the target grub.cfg file to the clone one and update it to add the menu entry for the 
 clone linux system, as shown below:
 
-<p aligh="center"><img src="https://i.imgur.com/i3QcTXb.gif"></p>
+<p align="center"><img src="https://i.imgur.com/i3QcTXb.gif"></p>
 
 As you could see on the image above, if you selected a target /home partition, a confirmation screen will be
 showing information about the source and target home partitions and, if you type y or Y to proceed, it will carry out
