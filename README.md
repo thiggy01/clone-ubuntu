@@ -22,7 +22,7 @@ Imortant notes to consider:
 
 * You must be cloning from your mounted (live) boot system and mounted home partition.
 
-* You must create empty ext4 partitions large enough to hold your linux distro partitions.
+* You must create empty ext4 partitions large enough to hold your boot and home partitions.
 
 * Your target (clone) partitions must not be mounted before calling the `clone-linux` script.
 
@@ -37,5 +37,8 @@ execution permission with `chmod +x clone-linux` and run it with root privileges
 
 After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition, as
 seen below.
-
 ![clone-linux menu](https://i.imgur.com/OY71spK.png)
+
+If you have a separate /home partition, it will be detected by the script and you will be promped to select the target
+/home partitiona, as seen below.
+![Imgur](https://i.imgur.com/nmAatyQ.png)

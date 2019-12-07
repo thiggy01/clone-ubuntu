@@ -176,7 +176,6 @@ while true; do
     if lsblk | grep -w "/home"; then
 	Choice=$(whiptail \
 	  --title "/home partition found. Select the target Home partition" \
-	  --backtitle "Clone Ubuntu system to another partition or device" \
 	  --ok-button "Select unmounted partition" \
 	  --cancel-button "Exit" \
 	  --notags \
