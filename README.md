@@ -35,7 +35,9 @@ Imortant notes to consider:
 Download it with the following command: `curl -L -O github.com/thiggy01/clone-linux/raw/master/clone-linux`, give it
 execution permission with `chmod +x clone-linux` and run it with root privileges as `sudo ./clone-linux`
 
-After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition. <img align="right" width="400" height="271" src="https://i.imgur.com/NGZMBOO.png">
+<img align="right" width="400" height="271" src="https://i.imgur.com/NGZMBOO.png">
+
+After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition. 
 
 If you have a separate /home partition, it will be detected by the script and you will be promped to select the target
 /home partition.
