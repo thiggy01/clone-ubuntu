@@ -37,12 +37,10 @@ execution permission with `chmod +x clone-linux` and run it with root privileges
 
 After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition, as
 seen below.
-<p align="center">
-<img src="https://i.imgur.com/X7MVELD.png">
-</p>
+<p align="center"><img src="https://i.imgur.com/X7MVELD.png"></p>
 If you have a separate /home partition, it will be detected by the script and you will be promped to select the target
 /home partition, as seen below.
-
+<p align="center"><img src="https://i.imgur.com/p8gpJCw.png"></p>
 After you selected the appropriate partitions, the script will mount your target boot partition and show a confirmation
 screen with the source and target information, including size, used and available space, etc.
-
+<p align="center"><img src="https://i.imgur.com/JfYyIal.png"></p>
