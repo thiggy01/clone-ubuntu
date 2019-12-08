@@ -54,13 +54,13 @@ When the copying is finished, the script will change the target fstab file in or
 It also changes the UUID from the target grub.cfg file to the clone one and update it to add the menu entry for the 
 clone linux system, as shown below:
 
-<p align="center"><img width="460" height="312" src="https://i.imgur.com/6cJnMC6.gifv"></p>
+<p align="center"><img width="460" height="312" src="https://i.imgur.com/6cJnMC6.gif"></p>
 
 As you could see on the image above, if you selected a target /home partition, a confirmation screen will be
 showing information about the source and target home partitions and, if you press y or Y to proceed, it will carry out
 almost the same process as before, with exception of not changing the grub configuration file.
 
-<p align="center"><img width="460" height="312" src="https://i.imgur.com/4aBPyon.gifv"></p>
+<p align="center"><img width="460" height="312" src="https://i.imgur.com/4aBPyon.gif"></p>
 
 Finally, the script will be unmounting your boot and home (if there is one) partitions and cleaning up all temporary files.
 The next time you boot your computer, you should see a new grub menu entry for your clone linux distribution and boot it 
