@@ -37,28 +37,30 @@ execution permission with `chmod +x clone-linux` and run it with root privileges
 
 After starting the script, you will see a menu asking you to selecte your umounted target boot "/" ext4 partition.
 
-<p align="center"><img src="https://i.imgur.com/X7MVELD.png"></p>
+<p align="center"><img width="460" height="312" src="https://i.imgur.com/2fUBIgr.png"></p>
 
 If you have a separate /home partition, it will be detected by the script and you will be promped to select the target
 /home partition.
 
-<p align="center"><img src="https://i.imgur.com/p8gpJCw.png"></p>
+<p align="center"><img width="460" height="312" src="https://i.imgur.com/be18MSl.png"></p>
 
 After you selected the appropriate partitions, the script will mount your target boot partition and show a confirmation
 screen with the source and target information, including size, used and available space, etc.
 
-<p align="center"><img src="https://i.imgur.com/JfYyIal.png"></p>
+<p align="center"><img width="460" height="312" src="https://i.imgur.com/FEhgCp4.png"></p>
 
 If you press Y or y to proceed, the script starts the cloning process and will show progress and some stats at the end.
 When the copying is finished, the script will change the target fstab file in order to mount the corrent clone UUID.
 It also changes the UUID from the target grub.cfg file to the clone one and update it to add the menu entry for the 
 clone linux system, as shown below:
 
-<p  aligh="center"><img src="https://i.imgur.com/i3QcTXb.gif"></p>
+<p align="center"><img width="460" height="312" src="https://i.imgur.com/6cJnMC6.gifv"></p>
 
 As you could see on the image above, if you selected a target /home partition, a confirmation screen will be
 showing information about the source and target home partitions and, if you press y or Y to proceed, it will carry out
 almost the same process as before, with exception of not changing the grub configuration file.
+
+<p align="center"><img width="460" height="312" src="https://i.imgur.com/4aBPyon.gifv"></p>
 
 Finally, the script will be unmounting your boot and home (if there is one) partitions and cleaning up all temporary files.
 The next time you boot your computer, you should see a new grub menu entry for your clone linux distribution and boot it 
