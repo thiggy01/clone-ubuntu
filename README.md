@@ -1,7 +1,7 @@
 # clone-linux
 
-This is a tool to clone your linux boot "/" system and your separate home "/home" partition, if there is one, into 
-another partition or device in a seamlessly and safely way.
+This is a tool to clone your linux root "/" system and your separate home "/home" partition, if there is one, into 
+another partition or device in a seamlessly and safely way. You may use it to move your all your data to a SDD drive when upgrading your computer or to create a isolated environment for testing purposes like upgrading your Operating System to a new version to see if there will be any errors in the process and avoid wiping out their previous system if anything fails.
 
 ## Credits 
  
@@ -20,15 +20,18 @@ Imortant notes to consider:
 
 * Your boot loader must be grub and the script must be ran in a terminal with bash shell and whiptail dialog boxes.
 
-* You must be cloning from your mounted (live) boot system and mounted home partition.
+* You must be cloning from INSIDE your (live) boot system and home partition.
 
-* You must create empty ext4 partitions large enough to hold your boot and home partitions.
+* YYou must create empty ext4 partitions LARGE ENOUGH TO HOLD your boot and home (if there is one) partitions. 
 
-* Your target (clone) partitions must not be mounted before calling the `clone-linux` script.
+* Your target (clone) partitions MUST NOT BE MOUNTED and HAVE TO BE AN EXT4 file system.
 
-* When you are recloning, any new data on the previous clone partition will be deleted.
+* When you are recloning, any new data on the previous clone partition WILL BE DELETED.
 
 * Before cloning, a confirmation screen is displayed with information about source and target partitions.
+
+* DON'T USE YOUR COMPUTER WHILE IT'S BEING CLONED BECAUSE YOU MAY END UP WITH INCONSISTENT DATA BETWEEN YOUR CLONED SOURCE AND CLONE TARGET.
+
 
 ## Usage
 
