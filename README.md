@@ -1,7 +1,7 @@
 # clone-linux
 
-This is a tool to clone your linux root "/" system and your separate home "/home" partition, if there is one, into 
-another partition or device in a seamlessly and safely way. You may use it to move your all your data to a SDD drive when upgrading your computer or to create a isolated environment for testing purposes like upgrading your Operating System to a new version to see if there will be any errors in the process and avoid wiping out their previous system if anything fails.
+This is a tool to clone your linux root "/" system and your separate home "/home" partition, if there is one, to 
+another disk in a seamlessly and safely way. You may use it to move your data to a Solid State Drive (SSD) when upgrading your computer or to create a isolated environment for testing purposes.
 
 ## Credits 
  
@@ -10,35 +10,50 @@ losing the whole system when upgrading from Ubuntu 16.04, 17.04 or 17.10 LTS to 
 
 ## Changings
 
-I removed some functionalities like changing release-upgrades file, moving your cron jobs to a hold folder, among other
+I removed some features like changing release-upgrades file, moving your cron jobs to a hold folder, among other
 things. I also added the ability to detect and clone, not just the root partition, but the /home partition too, among 
-other coding tweaks to turn the cloning process safer.
+other things to turn the cloning process easier and safer.
 
 ## Preparation
 
-Imortant notes to consider:
+### Booting and Partitioning
 
-* Your boot loader must be grub and the script must be ran in a terminal with bash shell and whiptail dialog boxes.
+* Your boot loader must be grub2 and and you'll have to remove all changes made by grub-customizer if installed.
 
-* You must be cloning from INSIDE your (live) boot system and home partition.
+* You'll need to create a BIOS boot partition of at least 1MiB to boot from a BIOS/GPT layout. 
 
-* YYou must create empty ext4 partitions LARGE ENOUGH TO HOLD your boot and home (if there is one) partitions. 
+* You'll need to create an EFI system partition of at least 100MiB to boot from an UEFI/MBR or an UEFI/GPT layout.
 
-* Your target (clone) partitions MUST NOT BE MOUNTED and HAVE TO BE AN EXT4 file system.
+* These booting partitions need to be created before your system partitions for GRUB to work properly.
 
-* When you are recloning, any new data on the previous clone partition WILL BE DELETED.
+* You must create empty ext4 partitions large enough to hold your boot and home (if there is one) partitions.
 
-* Before cloning, a confirmation screen is displayed with information about source and target partitions.
+* For information about how to create them, visit: https://wiki.archlinux.org/index.php/Partitioning   
 
-* DON'T USE YOUR COMPUTER WHILE IT'S BEING CLONED BECAUSE YOU MAY END UP WITH INCONSISTENT DATA BETWEEN YOUR CLONED SOURCE AND CLONE TARGET.
+### Prerequisites
 
+* The script must be ran in a terminal running bash shell and whiptail package has to be installed.
+
+* You must be cloning from inside your mounted root system and mounted home partition.
+ 
+* Your target clone partitions must not be mounted and have to be an ext4 file system.
+
+### Warnings
+
+* When you are recloning, any new data on the previous clone partition will be deleted.
+
+* Don't use your computer while it's being cloned because you may end up with inconsistent data between your cloned source and clone target.
+
+* IF YOU DON'T FOLLOW THE INSTRUCTIONS GIVEN ABOVE, THIS SCRIPT WILL DISPLAY A WARNING MESSAGE AND ABORT THE CLONING PROCESS.
 
 ## Usage
 
-Download it with the following command: `curl -L -O github.com/thiggy01/clone-linux/raw/master/clone-linux`, give it
-execution permission with `chmod +x clone-linux` and run it with root privileges as `sudo ./clone-linux`
+Download it with the following command: `curl -L -O github.com/thiggy01/clone-ubuntu/raw/master/clone-ubuntu`, give it
+execution permission with `chmod +x clone-ubuntu` and run it with root privileges as `sudo ./clone-ubuntu`
 
-After starting the script, you will see a menu asking you to select your umounted target boot "/" ext4 partition.
+After starting the script, you will see a series of instructions on how to prepare your disk to run the script properly.
+
+menu asking you to select your umounted target boot "/" ext4 partition.
 
 <p align="center"><img width="460" height="312" src="https://i.imgur.com/2fUBIgr.png"></p>
 
