@@ -30,15 +30,13 @@ other things to turn the cloning process easier and safer.
 
 * For information about how to create them, visit: https://wiki.archlinux.org/index.php/Partitioning   
 
-### Prerequisites
+### Prerequisites and Warnings
 
 * The script must be ran in a terminal running bash shell and whiptail package has to be installed.
 
 * You must be cloning from inside your mounted root system and mounted home partition.
  
 * Your target clone partitions must not be mounted and have to be an ext4 file system.
-
-### Warnings
 
 * When you are recloning, any new data on the previous clone partition will be deleted.
 
@@ -51,35 +49,10 @@ other things to turn the cloning process easier and safer.
 Download it with the following command: `curl -L -O github.com/thiggy01/clone-ubuntu/raw/master/clone-ubuntu`, give it
 execution permission with `chmod +x clone-ubuntu` and run it with root privileges as `sudo ./clone-ubuntu`
 
-After starting the script, you will see a series of instructions on how to prepare your disk to run the script properly.
+After starting the script, you will see a series of instructions on how to prepare your disk to clone your system properly. Then, a menu will be asking you to select your umounted target root "/" ext4 partition and, if you have a separate /home partition, it will be detected by the script and you will be promped to select the target
+/home partition. After you selected the appropriate partitions, the script will mount your target root partition and ask you to proceed. 
 
-menu asking you to select your umounted target boot "/" ext4 partition.
+If you type Y or y, the script will start the cloning process, showing the progress as long as it syncronizes the content and some stats at the end. Then, when the cloning process is finished, the script will change the target fstab file in order to mount the correct clone UUID. It also changes the target grub.cfg file to the clone's UUID, install the proper grub in the new disk and update it so you can have the appropriate boot menu. If you have a separate /home partition, the script will also ask you if you really want to carry out almost the same cloning process with your home partition.
 
-<p align="center"><img width="460" height="312" src="https://i.imgur.com/2fUBIgr.png"></p>
-
-If you have a separate /home partition, it will be detected by the script and you will be promped to select the target
-/home partition.
-
-<p align="center"><img width="460" height="312" src="https://i.imgur.com/be18MSl.png"></p>
-
-After you selected the appropriate partitions, the script will mount your target boot partition and show a confirmation
-screen with the source and target information, including size, used and available space, etc.
-
-<p align="center"><img width="460" height="312" src="https://i.imgur.com/FEhgCp4.png"></p>
-
-If you press Y or y to proceed, the script starts the cloning process and will show progress and some stats at the end.
-When the copying is finished, the script will change the target fstab file in order to mount the corrent clone UUID.
-It also changes the UUID from the target grub.cfg file to the clone one and update it to add the menu entry for the 
-clone linux system, as shown below:
-
-<p align="center"><img width="460" height="312" src="https://i.imgur.com/6cJnMC6.gif"></p>
-
-As you could see on the image above, if you selected a target /home partition, a confirmation screen will be
-showing information about the source and target home partitions and, if you press y or Y to proceed, it will carry out
-almost the same process as before, with exception of not changing the grub configuration file.
-
-<p align="center"><img width="460" height="312" src="https://i.imgur.com/4aBPyon.gif"></p>
-
-Finally, the script will be unmounting your boot and home (if there is one) partitions and cleaning up all temporary files.
-The next time you boot your computer, you should see a new grub menu entry for your clone linux distribution and boot it 
+Finally, the script will be unmounting your boot and home (if there is one) partitions and cleaning up all temporary files and when you boot from your new device you should see a new grub menu entry for your clone linux distribution and boot it 
 normally, as you would with the cloned one.
