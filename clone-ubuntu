@@ -1,16 +1,6 @@
 #!/bin/bash
-# This script automates the process of cloning linux systems into another 
-# disk in a seamlessly and safely way.
 # By Thiago Silva
 
-# This script is a fork of the code posted by WinEunuuchs2Unix at askubuntu.com 
-# (https://bit.ly/34RNGbv) as a tool to avoid losing the whole system when 
-# upgrading from Ubuntu 16.04, 17.04 or 17.10 LTS to 18.04 LTS.
-
-# I removed some features like changing release-upgrades file, moving 
-# your cron jobs to a hold folder, among other things. I also added the ability
-# to detect and clone, not just the root partition, but the /home partition too,
-# among other things to turn the cloning process easier and safer.
 # ==============================================================================
 
 ## Make sure the script has the appropriate environmnet to run ##
@@ -335,32 +325,44 @@ root partition?"
         exit 1
     fi
 fi
+# Get input from the user about folder exclusion and get confirmation to proceed.
 if [ $EmptyPart = 'true' ]; then
-    echo 
+    # Ask user if he wants to exclude a specific folder from the cloning process.
+    echo "The folders /dev /proc /sys /tmp /run /mnt /media /lost+found will "
+    echo "be excluded from the cloning process because they will be recreated"
+    echo "on your cloned environment when you boot it for the first time." 
+    echo "Do you want to exclude any other folder?"
+    read -p "Type y if yes. Other keys if no: " -n 1
+    echo
+    if [[ $REPLY =~ ^y$ ]]; then
+	echo "Type the full path to the folder to exclude: "
+	read UserFolder
+    fi
+    echo
     echo "========================================================================"
-    echo "Are you sure you wanto to clone $SourceRootDev to $TargetRootDev?"
-    echo 
+    echo "Are you sure you want to clone $SourceRootDev to $TargetRootDev?"
     read -p "Press Y (or y) to proceed. Any other key to exit: " -n 1
     echo   
-    if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 	CleanUp 
 	exit 0
     fi
 fi
+
 ## Copy root partition to target partition and update fstab and grub menu. ##
 
-# If there's a /home partition, don't copy it.
+# If there's a /home partition, don't clone it.
 if [ -n "$TargetHomeDev" ]; then
     SECONDS=0
     echo 
     echo "========================================================================"
     echo "Using rsync to clone / to $TargetRootDev mounted as $TargetRootMnt"
-    rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats   \
-        /* "$TargetRootMnt"                                                   \
+    rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats \
+        /* "$TargetRootMnt" \
 	--exclude={/home/*,/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found}
     echo 
     echo "Time to clone files: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
-# If there isn't a /home partition, don't exclude /home directory from copying.
+# If there isn't a /home partition, don't exclude /home directory from the cloning process.
 else
     SECONDS=0
     echo 
@@ -368,7 +370,7 @@ else
     echo "Using rsync to clone / to $TargetRootDev mounted as $TargetRootMnt"
     rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats   \
 	/* "$TargetRootMnt"                                                   \
-	--exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found}
+	--exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found,"$UserFolder"}
     echo 
     echo "Time to clone files: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
 fi
