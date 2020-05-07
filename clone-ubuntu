@@ -81,7 +81,6 @@ Validate () {
     fi
 }    
 
-
 ## Create a menu which allow users to select target root and home partitions ##
 
 # Generate menu list
@@ -229,10 +228,8 @@ There's no need to create any boot partition.
 Press <Enter> to continue." 9 62
 	else 
 	    # If there's no boot partition, exit.
-	    echo "A BIOS boot partition is required to boot from a BIOS/GPT \
-layout."
-	    echo "An EFI system partition is required to boot from an UEFI/GPT \
-layout."
+	    echo "A BIOS boot partition is required to boot from a BIOS/GPT layout."
+	    echo "An EFI system partition is required to boot from an UEFI/GPT layout."
 	    echo "No BIOS boot or EFI system partition were found."
 	    echo "Abortig cloning process."
 	    read -p "Press <Enter> to exit."
@@ -264,7 +261,7 @@ Press <Enter> to continue" 7 29
 	   CleanUp
 	   exit 0;
 	fi
-	ArrIdx=$(( $Choice * 2 + 1))
+	ArrIdx=$(( $Choice * 2 + 1 ))
 	Line="${AllPartsArr[$ArrIdx]}"
 	#Get UUID of source partition and build target device name from menu line.
 	GetUUID
@@ -281,16 +278,52 @@ done
 
 TargetRootMnt='/mnt/root'
 echo "========================================================================"
-echo "Mounting Root partition $TargetRootDev as $TargetRootMnt"
+echo "Mounting root partition $TargetRootDev as $TargetRootMnt"
+echo
 mkdir -p "$TargetRootMnt"
 mount -t ext4 "$TargetRootDev" "$TargetRootMnt"
-# Test if target partition has enough space to hold source data.
-UsedSpaceSrc=$(df --output=used "$SourceRootDev" | sed -n 2p)
-SizeSpaceTgt=$(df --output=size "$TargetRootDev" | sed -n 2p)
+if [ -z "$TargetHomeDev" ]; then
+# Ask user if he wants to exclude specific folders from the cloning process.
+    echo
+    echo "The folders /dev /proc /sys /tmp /run /mnt /media /lost+found will "
+    echo "be excluded from the cloning process because they will be recreated"
+    echo "on your cloned environment when you boot it for the first time."
+    echo "Do you want to exclude any other folder?"
+else
+    echo "The folders /dev /proc /sys /tmp /run /mnt /media /lost+found will "
+    echo "be excluded from the cloning process because they will be recreated"
+    echo "on your cloned environment when you boot it for the first time."
+    echo "Do you want to exclude any other folder?"
+    echo "*****************************Warning***********************************"
+    echo "Don't try to exclude any directory from your separate /home partition"
+    echo "because they will not be excluded, since /home partition will be cloned"
+    echo "later, after the / partition cloning process."
+    echo "***********************************************************************"
+fi
+read -p "Type Y or y if yes. Other keys if no: " -n 1
+echo
+if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+    echo "-------------------------------------------------------------------------"
+    echo "Insert the folder path and press <Enter> to include."
+    echo "You can insert as many folders as you want and everything inside it will"
+    echo "be excluded from the cloning process."
+    echo "Press <Ctrl> + D to finish the inclusion process."
+    while IFS= read UserFolder; do
+	Excludes+=( --exclude="$UserFolder" )
+	(( ExcludesSize+=$(du -s "$UserFolder" | cut -f 1) ))
+    done
+    # Get the space used by source partition without excluded folders and size of target
+    # partition.
+    UsedSpaceSrc=$(( $(df --output=used "$SourceRootDev" | sed -n 2p) - "$ExcludesSize" ))
+    SizeSpaceTgt=$(df --output=size "$TargetRootDev" | sed -n 2p)
+else
+    # Get the full space used by source partition and size of target partition.
+    UsedSpaceSrc=$(df --output=used "$SourceRootDev" | sed -n 2p)
+    SizeSpaceTgt=$(df --output=size "$TargetRootDev" | sed -n 2p)
+fi
 if [ "$UsedSpaceSrc" -gt "$SizeSpaceTgt" ]; then 
     clear
-    echo "Space used in source root partition is greater than space in selected \
-target"
+    echo "Space used in source root partition is greater than space in selected target"
     echo "Aborting cloning process."
     read -p "Press <Enter> to exit."
     CleanUp
@@ -302,10 +335,9 @@ LineCount=$(ls "$TargetRootMnt" | wc -l)
 if (( LineCount > 1 )) ; then 
     if [ -f "$TargetRootMnt"/etc/lsb-release ] ; then
 	echo
-	echo  "Selected partition has a(n) $(lsb_release -d | sed \
-	    's/Description:\s*//g') operating system in it."
-	echo "Are you sure you want to overwrite your target $TargetRootDev \
-root partition?"
+	echo "Selected partition has a(n) $(lsb_release -d | sed 's/Description:\s*//g') \
+operating system installation."
+	echo "Are you sure you want to overwrite your target $TargetRootDev root partition?"
 	echo
 	read -p "Press Y (or y) to proceed. Any other key to exit: " -n 1
 	echo   
@@ -325,25 +357,14 @@ root partition?"
         exit 1
     fi
 fi
-# Get input from the user about folder exclusion and get confirmation to proceed.
-if [ $EmptyPart = 'true' ]; then
-    # Ask user if he wants to exclude a specific folder from the cloning process.
-    echo "The folders /dev /proc /sys /tmp /run /mnt /media /lost+found will "
-    echo "be excluded from the cloning process because they will be recreated"
-    echo "on your cloned environment when you boot it for the first time." 
-    echo "Do you want to exclude any other folder?"
-    read -p "Type y if yes. Other keys if no: " -n 1
-    echo
-    if [[ $REPLY =~ ^y$ ]]; then
-	echo "Type the full path to the folder to exclude: "
-	read UserFolder
-    fi
+# Get confirmation to proceed with the root cloning process.
+if [ "$EmptyPart" == 'true' ]; then
     echo
     echo "========================================================================"
     echo "Are you sure you want to clone $SourceRootDev to $TargetRootDev?"
-    read -p "Press Y (or y) to proceed. Any other key to exit: " -n 1
+    read -p "Press Y or y to proceed. Any other key to exit: " -n 1
     echo   
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
 	CleanUp 
 	exit 0
     fi
@@ -359,7 +380,8 @@ if [ -n "$TargetHomeDev" ]; then
     echo "Using rsync to clone / to $TargetRootDev mounted as $TargetRootMnt"
     rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats \
         /* "$TargetRootMnt" \
-	--exclude={/home/*,/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found}
+	--exclude={/home/*,/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found} \
+	"${Excludes[@]}"
     echo 
     echo "Time to clone files: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
 # If there isn't a /home partition, don't exclude /home directory from the cloning process.
@@ -368,9 +390,10 @@ else
     echo 
     echo "========================================================================"
     echo "Using rsync to clone / to $TargetRootDev mounted as $TargetRootMnt"
-    rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats   \
-	/* "$TargetRootMnt"                                                   \
-	--exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found,"$UserFolder"}
+    rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats \
+	/* "$TargetRootMnt" \
+	--exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found} \
+	"${Excludes[@]}" 
     echo 
     echo "Time to clone files: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
 fi
@@ -437,16 +460,36 @@ if [ -n "$TargetHomeDev" ]; then
     TargetHomeMnt='/mnt/home'
     echo 
     echo "========================================================================="
-    echo "Mounting Home partition $TargetHomeDev as $TargetHomeMnt"
+    echo "Mounting home partition $TargetHomeDev as $TargetHomeMnt"
     echo
     mkdir "$TargetHomeMnt" 
     mount -t ext4 "$TargetHomeDev" "$TargetHomeMnt"
-    # Test if target home partition has enough space to hold source data.
-    UsedSpaceHome=$(df --output=used "$SourceHomeDev" | sed -n 2p)
-    SizeSpaceHome=$(df --output=size "$TargetHomeDev" | sed -n 2p)
-    if [ "$UsedSpaceHome" -gt "$SizeSpaceHome" ]; then
-	echo "Space used in source HOME partition is greater than space in selected \
-target"
+    # Ask user if he wants to exclude any folder from the cloning process.
+    echo "Do you want to exclude any folder from your /home partition?"
+    read -p "Type Y or y if yes. Other keys if no: " -n 1
+    echo
+    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+	echo "-------------------------------------------------------------------------"
+	echo "Insert the folder path and press <Enter> to include."
+	echo "You can insert as many folders as you want and everything inside it will"
+	echo "be excluded from the cloning process."
+	echo "Press <Ctrl> + D to finish the inclusion process."
+	while IFS= read UserFolder; do
+	    Excludes+=( --exclude="$UserFolder" )
+	    (( ExcludesSize+=$(du -s "$UserFolder" | cut -f 1) ))
+	done
+	# Get the space used by source partition without excluded folders and size of target
+	# partition.
+	UsedSpaceSrc=$(( "$(df --output=used "$SourceHomeDev" | sed -n 2p)" - "$ExcludesSize" ))
+	SizeSpaceTgt=$(df --output=size "$TargetHomeDev" | sed -n 2p)
+    else
+	# Get the full space used by source partition and size of target partition.
+	UsedSpaceSrc=$(df --output=used "$SourceHomeDev" | sed -n 2p)
+	SizeSpaceTgt=$(df --output=size "$TargetHomeDev" | sed -n 2p)
+    fi
+    if [ "$UsedSpaceSrc" -gt "$SizeSpaceTgt" ]; then
+	clear
+	echo "Space used in source /home partition is greater than space in selected target"
 	echo "Aborting cloning process."
 	read -p "Press <Enter> to exit"
 	echo
@@ -459,18 +502,19 @@ target"
     if (( LineCnt > 1 )); then 
 	# If it's not empty and it's a root system, abort. 	
 	if [ -f "$TargetHomeMnt"/etc/lsb-release ] ; then
+	    clear
 	    echo "Selected partition is a root partition. Aborting."
 	    CleanUp
 	    exit 1
 	else
+	    echo
 	    echo "Your target /home partition already has some data in it"
 	    echo "You may lose some data if they're not in your source partition"
-	    echo "Are you sure you want to overwrite your target $TargetHomeDev \
-/home partition?"
+	    echo "Are you sure you want to overwrite your target $TargetHomeDev /home partition?"
 	    echo
 	    read -p "Type Y (or y) to proceed. Any other key to exit: " -n 1
 	    echo
-	    if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
+	    if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
 		CleanUp
 		exit 0
 	    else
@@ -478,7 +522,7 @@ target"
 	    fi
 	fi
     fi
-    if [ "$EmpttyPart" = 'True']; then
+    if [ "$EmptyPart" == 'true' ]; then
 	echo 
 	echo "========================================================================="
 	echo "Are you sure you want to clone $SourceHomeDev to $TargetHomeDev?"
@@ -486,7 +530,7 @@ target"
 	# Confirmation to proceed. 
 	read -p "Type Y (or y) to proceed. Any other key to exit: " -n 1
 	echo   
-	if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
+	if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
 	    CleanUp
 	    exit 0
 	fi	
@@ -499,7 +543,7 @@ target"
     echo "========================================================================="
     echo "Using rsync to clone /home to $TargetHomeDev mounted as $TargetHomeMnt"
     rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats   \
-	/home/* "$TargetHomeMnt"
+	/home/* "$TargetHomeMnt" "${Excludes[@]/\/home/}"
     echo 
     echo "Time to clone files: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
     # Update /etc/fstab on clone partition with clone's UUID
