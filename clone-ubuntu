@@ -294,27 +294,30 @@ else
     echo "be excluded from the cloning process because they will be recreated"
     echo "on your cloned environment when you boot it for the first time."
     echo "Do you want to exclude any other folder?"
-    echo "*****************************Warning***********************************"
+    echo "*****************************Warning************************************"
     echo "Don't try to exclude any directory from your separate /home partition"
     echo "because they will not be excluded, since /home partition will be cloned"
     echo "later, after the / partition cloning process."
-    echo "***********************************************************************"
+    echo "************************************************************************"
 fi
 read -p "Type Y or y if yes. Other keys if no: " -n 1
 echo
 if [[ "$REPLY" =~ ^[Yy]$ ]]; then
-    echo "-------------------------------------------------------------------------"
-    echo "Insert the folder path and press <Enter> to include."
+    echo "------------------------------------------------------------------------"
+    echo "Insert the full path to the folder and press <Enter> to include."
     echo "You can insert as many folders as you want and everything inside it will"
     echo "be excluded from the cloning process."
-    echo "Press <Ctrl> + D to finish the inclusion process."
+    echo "Press <Ctrl> + D to finish adding directories."
     while IFS= read UserFolder; do
 	Excludes+=( --exclude="$UserFolder" )
-	(( ExcludesSize+=$(du -s "$UserFolder" | cut -f 1) ))
+	(( ExcludesSize+=$(du -s "$UserFolder" | cut -f 1) )) 2> /dev/null
+	if [ "$?" -eq 1 ]; then
+	    echo "Folder not found. Please, submit a valid path."
+	fi
     done
     # Get the space used by source partition without excluded folders and size of target
     # partition.
-    UsedSpaceSrc=$(( $(df --output=used "$SourceRootDev" | sed -n 2p) - "$ExcludesSize" ))
+    UsedSpaceSrc=$(( $(df --output=used "$SourceRootDev" | sed -n 2p) - "$ExcludesSize" )) \
     SizeSpaceTgt=$(df --output=size "$TargetRootDev" | sed -n 2p)
 else
     # Get the full space used by source partition and size of target partition.
@@ -470,13 +473,17 @@ if [ -n "$TargetHomeDev" ]; then
     echo
     if [[ "$REPLY" =~ ^[Yy]$ ]]; then
 	echo "-------------------------------------------------------------------------"
-	echo "Insert the folder path and press <Enter> to include."
+	echo "Insert the full path to the folder and press <Enter> to include."
 	echo "You can insert as many folders as you want and everything inside it will"
 	echo "be excluded from the cloning process."
-	echo "Press <Ctrl> + D to finish the inclusion process."
+	echo "Press <Ctrl> + D to finish adding directories"
 	while IFS= read UserFolder; do
 	    Excludes+=( --exclude="$UserFolder" )
-	    (( ExcludesSize+=$(du -s "$UserFolder" | cut -f 1) ))
+	    (( ExcludesSize+=$(du -s "$UserFolder" | cut -f 1) )) 2> /dev/null
+	    if [ "$?" -eq 1 ]; then
+		echo "Folder not found."
+		echo "Submit a valid path."
+	    fi
 	done
 	# Get the space used by source partition without excluded folders and size of target
 	# partition.
