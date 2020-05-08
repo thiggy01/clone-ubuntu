@@ -1,7 +1,8 @@
-#!/bin/bash
-# By Thiago Silva
-
-# ==============================================================================
+#!/usr/bin/env bash
+# Autor: Thiago Silva
+# Contact: thiagos.dasilva@gmail.com
+# URL: https://github.com/thiggy01/clone-ubuntu
+# ============================================= #
 
 ## Make sure the script has the appropriate environmnet to run ##
 
