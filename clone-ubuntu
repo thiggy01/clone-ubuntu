@@ -15,14 +15,14 @@ if [ "$CurrentTERM" = "" ] ; then
 fi
 
 # Script must be run as root.
-if [ "$(id -u)" -ne 0 ] ; then 
-    echo "Usage: sudo $0" 
+if [ "$(id -u)" -ne 0 ] ; then
+    echo "Usage: sudo $0"
     exit 1
 fi
 
 # Create unqique temporary file names.
 
-TmpUUIDList=$(mktemp /tmp/clone-ubuntu.XXXXX)  
+TmpUUIDList=$(mktemp /tmp/clone-ubuntu.XXXXX)
 TmpWhiptailMenu=$(mktemp /tmp/clone-ubuntu.XXXXX)
 
 ## Create functions for repeated code ##
@@ -31,9 +31,9 @@ TmpWhiptailMenu=$(mktemp /tmp/clone-ubuntu.XXXXX)
 CleanUp () {
     [ -f "$TmpUUIDList" ] && rm -f "$TmpUUIDList"
     [ -f "$TmpWhiptailMenu" ] && rm -f "$TmpWhiptailMenu"
-    if [ -d "$TargetRootMnt" ]; then		
-        umount "$TargetRootMnt" -l             
-        rm -d "$TargetRootMnt"                
+    if [ -d "$TargetRootMnt" ]; then
+        umount "$TargetRootMnt" -l
+        rm -d "$TargetRootMnt"
     fi
     if [ -d "$TargetHomeMnt" ]; then
 	umount "$TargetHomeMnt" -l
@@ -43,22 +43,22 @@ CleanUp () {
 
 # Gets UUIDs of source and clone target partitions in menu.
 GetUUID () {
-    UUID_col=0                          
+    UUID_col=0
     lsblk -o NAME,UUID > "$TmpUUIDList"
-    while read -r UUID_Line; do       
+    while read -r UUID_Line; do
         # Establish UUID position on line
-        if [ $UUID_col = 0 ] ; then  
+        if [ $UUID_col = 0 ] ; then
             UUID_col="${UUID_Line%%UUID*}"
-            UUID_col="${#UUID_col}"      
-            NameLen=$(( UUID_col - 1 )) 
-            continue                   
+            UUID_col="${#UUID_col}"
+            NameLen=$(( UUID_col - 1 ))
+            continue
         fi
         # Check if passed line name (/dev/sda1, /nvme01np8, etc) matches.
         if [ "${UUID_Line:0:$NameLen}" = "${Line:0:$NameLen}" ] ; then
             FoundUUID="${UUID_Line:UUID_col:999}"
-            break                     
+            break
         fi
-    done < "$TmpUUIDList"            
+    done < "$TmpUUIDList"
 }
 
 # Verify if it's a valid ext4 filesystem umounted partition.
@@ -80,7 +80,7 @@ Validate () {
         read -p "Press <Enter> to continue"
 	return 1
     fi
-}    
+}
 
 ## Create a menu which allow users to select target root and home partitions ##
 
@@ -91,22 +91,22 @@ i=0
 SPACES='                                                                     '
 Heading=true
 AllPartsArr=()
-# As long as there's a line to read, build whiptail menu tags and text into 
+# As long as there's a line to read, build whiptail menu tags and text into
 # an array.
 while read -r Line; do
     # Get heading text, file system and mount point positions.
     if [ "$Heading" = true ] ; then
-        Heading=false   
-        MenuText="$Line" 
-        FSTYPE_col="${Line%%FSTYPE*}"           
-        FSTYPE_col="${#FSTYPE_col}"   
+        Heading=false
+        MenuText="$Line"
+        FSTYPE_col="${Line%%FSTYPE*}"
+        FSTYPE_col="${#FSTYPE_col}"
         MOUNTPOINT_col="${Line%%MOUNTPOINT*}"
         MOUNTPOINT_col="${#MOUNTPOINT_col}"
         continue
     fi
     # Adjust line position and length
-    Line="$Line$SPACES"                   
-    Line=${Line:0:74}                    
+    Line="$Line$SPACES"
+    Line=${Line:0:74}
     # Get Root source UUID and device.
     if [ "${Line:MOUNTPOINT_col:4}" = "/   " ] ; then
         GetUUID
@@ -124,11 +124,11 @@ while read -r Line; do
         SourceHomeDev=/dev/"${SourceHomeDev:2:999}"
     fi
     # Add whiptail menu tags and text.
-    AllPartsArr+=("$i" "$Line")         
+    AllPartsArr+=("$i" "$Line")
     (( i++ ))
 # Get menu list from temporary file.
-done < "$TmpWhiptailMenu"              
-# Display whiptail menu in while loop until no errors or escape is pressed or 
+done < "$TmpWhiptailMenu"
+# Display whiptail menu in while loop until no errors or escape is pressed or
 # a valid partition is selected.
     # Call whiptail box to paint instruction info and message boxes.
     TERM=ansi whiptail --infobox "Starting clone-ubuntu script ..." 7 36
@@ -157,7 +157,7 @@ https://wiki.archlinux.org/index.php/Partitioning
 whiptail package has to be installed.
 
 You must be cloning from inside your mounted root system and home partition to \
-another disk. 
+another disk.
 
 Your target clone partitions must not be mounted and have to be an ext4 file \
 system.
@@ -185,27 +185,28 @@ while true; do
         --menu "$MenuText" 24 80 16 \
         "${AllPartsArr[@]}" \
         2>&1 >/dev/tty)
-    clear                             
+    clear
     # If no choice was made, clean and exit.
-    if [ "$Choice" = "" ]; then      
+    if [ "$Choice" = "" ]; then
         CleanUp
         exit 0;
     fi
     # Get user selection.
-    ArrIdx=$(( $Choice * 2 + 1))    
-    Line="${AllPartsArr[$ArrIdx]}" 
-    # Get UUID from source partition. 
+    ArrIdx=$(( $Choice * 2 + 1))
+    Line="${AllPartsArr[$ArrIdx]}"
+    # Get UUID from source partition.
     GetUUID
-    # Build target device name from line. 
+    # Build target device name from line.
     TargetRootUUID=$FoundUUID
     TargetRootDev="${Line%% *}"
     TargetRootDev=/dev/"${TargetRootDev:2:999}"
     # validate selection.
-    Validate 
+    Validate
     [ $? -eq 1 ] && continue
     # Verify if the script is cloning to another disk.
-    SourceDisk=$(echo "$SourceRootDev" | sed 's/[0-9]\+$//')
-    TargetDisk=$(echo "$TargetRootDev" | sed 's/[0-9]\+$//')
+    # Changed regex to fix a bug with NVMe disks thanks to @alexlemaire from Github.
+    SourceDisk=$(echo "$SourceRootDev" | sed 's/p\?[0-9]\+$//')
+    TargetDisk=$(echo "$TargetRootDev" | sed 's/p\?[0-9]\+$//')
     if [ "$SourceDisk" != "$TargetDisk" ]; then
 	# Check if Bios boot partition is present.
 	if fdisk -l "$TargetDisk" | grep -q 'BIOS'; then
@@ -217,7 +218,7 @@ Press <Enter> to continue." 8 34
 	    whiptail --msgbox "EFI system partition detected.
 Press <Enter> to continue." 8 34
 	    clear
-	    # Get the new EFI system partition device. 
+	    # Get the new EFI system partition device.
 	    NewEfiDev="$(fdisk -l "$TargetDisk" | grep 'EFI' | sed 's/\s.*//')"
 	    # Check what kernel architecture is being used.
 	    case $(uname -m) in i?86) GrubTarget='i386-efi' ;;\
@@ -227,7 +228,7 @@ Press <Enter> to continue." 8 34
 	    whiptail --msgbox "A MBR partition table was detected.
 There's no need to create any boot partition.
 Press <Enter> to continue." 9 62
-	else 
+	else
 	    # If there's no boot partition, exit.
 	    echo "A BIOS boot partition is required to boot from a BIOS/GPT layout."
 	    echo "An EFI system partition is required to boot from an UEFI/GPT layout."
@@ -257,7 +258,7 @@ Press <Enter> to continue" 7 29
 	  --menu "$MenuText" 24 80 16 \
 	  "${AllPartsArr[@]}" \
 	  2>&1 >/dev/tty)
-	clear                     
+	clear
 	if [[ $Choice = "" ]]; then
 	   CleanUp
 	   exit 0;
@@ -272,8 +273,8 @@ Press <Enter> to continue" 7 29
 	Validate
 	[ "$?" = 1 ] && continue
     fi
-    break                            
-done                                
+    break
+done
 
 ## Get confirmation about root and clone partitions. ##
 
@@ -325,7 +326,7 @@ else
     UsedSpaceSrc=$(df --output=used "$SourceRootDev" | sed -n 2p)
     SizeSpaceTgt=$(df --output=size "$TargetRootDev" | sed -n 2p)
 fi
-if [ "$UsedSpaceSrc" -gt "$SizeSpaceTgt" ]; then 
+if [ "$UsedSpaceSrc" -gt "$SizeSpaceTgt" ]; then
     clear
     echo "Space used in source root partition is greater than space in selected target"
     echo "Aborting cloning process."
@@ -336,7 +337,7 @@ fi
 # Test if target partition is not an empty partition.
 EmptyPart='true'
 LineCount=$(ls "$TargetRootMnt" | wc -l)
-if (( LineCount > 1 )) ; then 
+if (( LineCount > 1 )) ; then
     if [ -f "$TargetRootMnt"/etc/lsb-release ] ; then
 	echo
 	echo "Selected partition has a(n) $(lsb_release -d | sed 's/Description:\s*//g') \
@@ -344,9 +345,9 @@ operating system installation."
 	echo "Are you sure you want to overwrite your target $TargetRootDev root partition?"
 	echo
 	read -p "Press Y (or y) to proceed. Any other key to exit: " -n 1
-	echo   
+	echo
 	if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
-	    CleanUp 
+	    CleanUp
 	    exit 0
 	else
 	    EmptyPart='false'
@@ -357,7 +358,7 @@ operating system installation."
         echo "Selected partition is not an empty root partition."
 	echo "Aborting cloning process."
 	read -p "Press <Enter> to exit"
-        CleanUp                          
+        CleanUp
         exit 1
     fi
 fi
@@ -367,9 +368,9 @@ if [ "$EmptyPart" == 'true' ]; then
     echo "========================================================================"
     echo "Are you sure you want to clone $SourceRootDev to $TargetRootDev?"
     read -p "Press Y or y to proceed. Any other key to exit: " -n 1
-    echo   
+    echo
     if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
-	CleanUp 
+	CleanUp
 	exit 0
     fi
 fi
@@ -379,30 +380,30 @@ fi
 # If there's a /home partition, don't clone it.
 if [ -n "$TargetHomeDev" ]; then
     SECONDS=0
-    echo 
+    echo
     echo "========================================================================"
     echo "Using rsync to clone / to $TargetRootDev mounted as $TargetRootMnt"
     rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats \
         /* "$TargetRootMnt" \
 	--exclude={/home/*,/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found} \
 	"${Excludes[@]}"
-    echo 
+    echo
     echo "Time to clone files: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
 # If there isn't a /home partition, don't exclude /home directory from the cloning process.
 else
     SECONDS=0
-    echo 
+    echo
     echo "========================================================================"
     echo "Using rsync to clone / to $TargetRootDev mounted as $TargetRootMnt"
     rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats \
 	/* "$TargetRootMnt" \
 	--exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found} \
-	"${Excludes[@]}" 
-    echo 
+	"${Excludes[@]}"
+    echo
     echo "Time to clone files: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
 fi
 # Update /etc/fstab and /boot/grub/grub.cfg on target partition with clone's UUID
-echo 
+echo
 echo "========================================================================"
 echo "Updating $TargetRootMnt/etc/fstab and $TargetRootMnt/boot/grub/grub.cfg files."
 echo
@@ -410,7 +411,7 @@ echo "from UUID: $SourceRootUUID"
 echo "  to UUID: $TargetRootUUID"
 sed -i "s/$SourceRootUUID/$TargetRootUUID/g" "$TargetRootMnt"/etc/fstab
 sed -i "s/$SourceRootUUID/$TargetRootUUID/g" "$TargetRootMnt"/boot/grub/grub.cfg
-echo 
+echo
 echo "========================================================================"
 # If cloning to another disk, check if there is a boot partition and install and
 # update grub accordingly.
@@ -419,8 +420,8 @@ for i in /dev /sys /proc /run; do mount --bind "$i" "$TargetRootMnt$i"; done
 if [ -n "$NewEfiDev" ]; then
     if [ ! -d "$TargetRootMnt"/boot/efi ]; then
 	echo "Creating EFI system partition directory ..."
-	mkdir "$TargetRootMnt"/boot/efi 
-    fi 
+	mkdir "$TargetRootMnt"/boot/efi
+    fi
     echo "Mounting EFI system partition ..."
     mount "$NewEfiDev" "$TargetRootMnt"/boot/efi
     if grep -q 'efi' "$TargetRootMnt"/etc/fstab; then
@@ -430,21 +431,21 @@ if [ -n "$NewEfiDev" ]; then
     echo "Checking if an EFI enabled grub is installed ..."
     chroot "$TargetRootMnt" dpkg -S 'grub-efi' >& /dev/null; \
 	[ "$?" -eq 1 ] && GrubEfi='false'
-    
+
     if [ "$GrubEfi" = 'false' ]; then
 	echo "Installing EFI enabled GRUB package ..."
 	chroot "$TargetRootMnt" apt-get install -y grub-efi >& /dev/null
 	echo "Installing GRUB boatloader on $TargetDisk disk ..."
 	chroot "$TargetRootMnt" grub-install --target="$GrubTarget" \
-	    "$TargetDisk" 
+	    "$TargetDisk"
 	echo "Calling 'update-grub' to create a new boot menu ..."
-	chroot "$TargetRootMnt" update-grub 
+	chroot "$TargetRootMnt" update-grub
 	echo "Umounting EFI System Partition ..."
 	umount "$NewEfiDev"
     else
 	echo "Installing GRUB boatloader on $TargetDisk disk ..."
 	chroot "$TargetRootMnt" grub-install --target="$GrubTarget" \
-	    "$TargetDisk" 
+	    "$TargetDisk"
 	echo "Calling 'update-grub' to create a new boot menu ..."
 	chroot "$TargetRootMnt" update-grub
 	echo "Umounting EFI System Partition ..."
@@ -452,7 +453,7 @@ if [ -n "$NewEfiDev" ]; then
     fi
 else
     echo "Installing GRUB boatloader on $TargetDisk disk ..."
-    chroot "$TargetRootMnt" grub-install "$TargetDisk" 
+    chroot "$TargetRootMnt" grub-install "$TargetDisk"
     echo "Calling 'update-grub' to create a new boot menu ..."
     chroot "$TargetRootMnt" update-grub
 fi
@@ -460,13 +461,13 @@ fi
 
 ## Get confirmation about home and clone partitions. ##
 
-if [ -n "$TargetHomeDev" ]; then	
+if [ -n "$TargetHomeDev" ]; then
     TargetHomeMnt='/mnt/home'
-    echo 
+    echo
     echo "========================================================================="
     echo "Mounting home partition $TargetHomeDev as $TargetHomeMnt"
     echo
-    mkdir "$TargetHomeMnt" 
+    mkdir "$TargetHomeMnt"
     mount -t ext4 "$TargetHomeDev" "$TargetHomeMnt"
     # Ask user if he wants to exclude any folder from the cloning process.
     echo "Do you want to exclude any folder from your /home partition?"
@@ -507,8 +508,8 @@ if [ -n "$TargetHomeDev" ]; then
     # Test if target home partition is empty.
     EmptyPart='true'
     LineCnt=$(ls "$TargetHomeMnt" | wc -l)
-    if (( LineCnt > 1 )); then 
-	# If it's not empty and it's a root system, abort. 	
+    if (( LineCnt > 1 )); then
+	# If it's not empty and it's a root system, abort.
 	if [ -f "$TargetHomeMnt"/etc/lsb-release ] ; then
 	    clear
 	    echo "Selected partition is a root partition. Aborting."
@@ -531,38 +532,38 @@ if [ -n "$TargetHomeDev" ]; then
 	fi
     fi
     if [ "$EmptyPart" == 'true' ]; then
-	echo 
+	echo
 	echo "========================================================================="
 	echo "Are you sure you want to clone $SourceHomeDev to $TargetHomeDev?"
 	echo
-	# Confirmation to proceed. 
+	# Confirmation to proceed.
 	read -p "Type Y (or y) to proceed. Any other key to exit: " -n 1
-	echo   
+	echo
 	if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
 	    CleanUp
 	    exit 0
-	fi	
-    fi 
+	fi
+    fi
 
     ## Copy home partition to target partition. ##
 
     SECONDS=0
-    echo 
+    echo
     echo "========================================================================="
     echo "Using rsync to clone /home to $TargetHomeDev mounted as $TargetHomeMnt"
     rsync -axhAX --info=progress2 --info=name0 --delete --inplace --stats   \
 	/home/* "$TargetHomeMnt" "${Excludes[@]/\/home/}"
-    echo 
+    echo
     echo "Time to clone files: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
     # Update /etc/fstab on clone partition with clone's UUID
-    echo 
+    echo
     echo "========================================================================="
     echo "Updating $TargetRootMnt/etc/fstab file"
     echo "from UUID: $SourceHomeUUID"
     echo "  to UUID: $TargetHomeUUID"
     sed -i "s/$SourceHomeUUID/$TargetHomeUUID/g" "$TargetRootMnt"/etc/fstab
     # Display Unmount home clone partition message.
-    echo 
+    echo
     echo "========================================================================="
     echo "Unmounting $TargetHomeDev as $TargetHomeMnt"
 fi
@@ -570,10 +571,10 @@ fi
 ## Unmount root partition, remove temporaty files and give final instructions ##
 ## before exit the scritp sucessfully. ##
 
-echo 
+echo
 echo "========================================================================="
 echo "Unmounting $TargetRootDev as $TargetRootMnt"
-echo 
+echo
 echo "========================================================================="
 echo "Cloning process finished"
 echo
@@ -588,5 +589,5 @@ echo
 echo "If you use grub-customizer or has custom menu entries, you can also"
 echo "customize your grub menu the way you like after that."
 echo
-CleanUp             
+CleanUp
 exit 0
