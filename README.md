@@ -1,7 +1,7 @@
-# clone-linux
+# clone-ubuntu
 
 This is a tool to clone your linux root "/" system and your separate home "/home" partition, if there is one, to 
-another disk in a seamlessly and safely way. You may use it to move your data to a Solid State Drive (SSD) when upgrading your computer or to create a isolated environment for testing purposes.
+another disk in a seamlessly and safely way. You may use it to move your data to a Solid State Drive (SSD) when upgrading your computer or to create an isolated environment for testing purposes.
 
 ## Credits 
  
@@ -36,7 +36,7 @@ other things to turn the cloning process easier and safer.
 
 * You must be cloning from inside your mounted root system and mounted home partition.
  
-* Your target clone partitions must not be mounted and have to be an ext4 file system.
+* Your target clone partitions must not be mounted and have to be using an ext4 file system.
 
 * When you are recloning, any new data on the previous clone partition will be deleted.
 
@@ -46,13 +46,12 @@ other things to turn the cloning process easier and safer.
 
 ## Usage
 
-Download it with the following command: `curl -L -O github.com/thiggy01/clone-ubuntu/raw/master/clone-ubuntu`, give it
-execution permission with `chmod +x clone-ubuntu` and run it with root privileges as `sudo ./clone-ubuntu`
+Download the script with the following command: `wget github.com/thiggy01/clone-ubuntu/raw/master/clone-ubuntu`, make it executable with `chmod +x clone-ubuntu` and run it with root privileges as `sudo ./clone-ubuntu`
 
-After starting the script, you will see a series of instructions on how to prepare your disk to clone your system properly. Then, a menu will be asking you to select your umounted target root "/" ext4 partition and, if you have a separate /home partition, it will be detected by the script and you will be promped to select the target
-/home partition. After you selected the appropriate partitions, the script will mount your target root partition and ask you to proceed. 
+After starting the script, you will see instructions on how to prepare your disk to clone your system properly. Then, a menu will be asking you to select your umounted target root "/" ext4 partition and, if you have a separate /home partition, it will be detected by the script and you will be promped to select the target /home partition. 
 
-If you type Y or y, the script will start the cloning process, showing the progress as long as it syncronizes the content and some stats at the end. Then, when the cloning process is finished, the script will change the target fstab file in order to mount the correct clone UUID. It also changes the target grub.cfg file to the clone's UUID, install the proper grub in the new disk and update it so you can have the appropriate boot menu. If you have a separate /home partition, the script will also ask you if you really want to carry out almost the same cloning process with your home partition.
+After you selected the appropriate partitions, the script will mount your target root partition and ask you to proceed. If you type Y or y, the script will start the cloning process, showing the progress and some stats. Then, when the cloning process is finished, the script will change the target fstab file in order to mount the correct clone UUID. It will also change the target grub.cfg file to include the clone's UUID, install the proper grub in the new disk and update it so you can have the appropriate boot menu. 
 
-Finally, the script will be unmounting your boot and home (if there is one) partitions and cleaning up all temporary files and when you boot from your new device you should see a new grub menu entry for your clone linux distribution and boot it 
-normally, as you would with the cloned one.
+If you have a separate /home partitionf the script will also ask you if you want to proceed with the process of cloning your home partition.
+
+Finally, the script will unmount your root and home (if there is one) partitions and clean up all temporary files. Then, when you boot from your new device, you should see a new grub menu entry for your clone linux distribution to boot it as you would with the cloned disk.
